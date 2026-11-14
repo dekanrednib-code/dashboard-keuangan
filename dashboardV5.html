@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#07090f">
+<title>Daily Financial Record</title>
+<script>window.__H = location.hash || "";</script>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root{--bg:#07090f;--gold:#d9bf88;--gold2:#c9a96a;--tx:#f5f2ea;--mu:rgba(255,255,255,.52);--ln:rgba(255,255,255,.07);--pos:#6ee7b7;--neg:#fda4af}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg)}
+body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--tx);min-height:100dvh;-webkit-font-smoothing:antialiased;
+ background:radial-gradient(440px 340px at 0% 14%,rgba(59,74,156,.34),transparent 70%),radial-gradient(400px 320px at 100% 88%,rgba(201,169,106,.13),transparent 70%),var(--bg);
+ background-attachment:fixed;transition:opacity .15s ease,transform .15s ease}
+body.out{opacity:0;transform:scale(.98)}
+.wrap{width:100%;max-width:480px;margin:0 auto;padding:calc(env(safe-area-inset-top,0px) + 22px) 16px calc(env(safe-area-inset-bottom,0px) + 28px);animation:in .5s ease both}
+@keyframes in{from{opacity:0}to{opacity:1}}
+.top{margin:0 2px 20px}
+.hi{font-size:26px;font-weight:500;letter-spacing:-.01em}
+.dt{font-size:14px;color:var(--mu);margin-top:4px}
+.g{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.08);border-top-color:rgba(255,255,255,.2);border-radius:22px;padding:18px;margin-bottom:14px}
+@supports ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.g{background:rgba(255,255,255,.045);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}}
+.hero{background:linear-gradient(155deg,rgba(255,255,255,.14),rgba(255,255,255,.04) 60%);border-top-color:rgba(255,255,255,.34);box-shadow:inset 0 1px 0 rgba(255,255,255,.12);padding:22px 20px}
+.t{font-size:13px;font-weight:500;color:var(--mu);margin-bottom:14px}
+.hero .t{margin-bottom:6px}
+.big{display:flex;align-items:baseline;gap:8px}
+.big small{font-size:18px;color:var(--gold)}
+.big b{font-size:42px;font-weight:500;letter-spacing:-.025em;font-variant-numeric:tabular-nums;line-height:1.15}
+.bar{height:4px;border-radius:2px;background:rgba(255,255,255,.1);overflow:hidden;margin-top:16px}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--gold2),#e8d4a2);transition:width .8s ease .15s}
+.note{font-size:12px;color:var(--mu);margin-top:8px}
+.duo{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:18px}
+.chip{display:flex;align-items:center;gap:10px;border-radius:14px;padding:10px 12px;border:1px solid}
+.chip.p{background:rgba(52,211,153,.12);border-color:rgba(52,211,153,.32);color:var(--pos)}
+.chip.n{background:rgba(251,113,133,.12);border-color:rgba(251,113,133,.32);color:var(--neg)}
+.chip svg{width:18px;height:18px;flex:none}
+.chip small{display:block;font-size:11px;opacity:.8}
+.chip b{display:block;font-size:15px;font-weight:500;font-variant-numeric:tabular-nums;margin-top:1px}
+.per{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+.per>div{text-align:center;padding:0 4px}
+.per>div+div{border-left:1px solid var(--ln)}
+.per .k{font-size:12px;color:var(--mu)}
+.per .v{font-size:16px;font-weight:500;margin-top:6px;font-variant-numeric:tabular-nums}
+.per .c{font-size:11px;color:var(--mu);margin-top:3px}
+.pos{color:var(--pos)}.neg{color:var(--neg)}
+.wk{display:flex;align-items:flex-end;justify-content:space-between;height:72px}
+.wk i{display:block;width:10%;border-radius:5px;background:rgba(255,255,255,.14);min-height:3px}
+.wk i.on{background:linear-gradient(180deg,#e8d4a2,var(--gold2))}
+.wl{display:flex;justify-content:space-between;font-size:11px;color:var(--mu);margin-top:8px}
+.wl span{width:10%;text-align:center}
+.seg{display:flex;height:8px;border-radius:4px;overflow:hidden;gap:2px;margin-bottom:6px}
+.seg i{display:block;height:100%}
+.row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--ln)}
+.row:first-of-type{border-top:0}
+.l{display:flex;align-items:center;gap:12px;min-width:0}
+.dot{width:8px;height:8px;border-radius:50%;flex:none}
+.av{width:36px;height:36px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;border:1px solid}
+.av svg{width:16px;height:16px}
+.av.p{background:rgba(52,211,153,.12);border-color:rgba(52,211,153,.3);color:var(--pos)}
+.av.n{background:rgba(251,113,133,.12);border-color:rgba(251,113,133,.3);color:var(--neg)}
+.tt{min-width:0}
+.tt b{display:block;font-size:15px;font-weight:400;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tt small{display:block;font-size:12px;color:var(--mu);margin-top:2px}
+.r{text-align:right;flex:none}
+.r b{display:block;font-size:15px;font-weight:500;font-variant-numeric:tabular-nums}
+.r small{display:block;font-size:12px;color:var(--mu);margin-top:2px}
+.empty{font-size:13px;color:var(--mu)}
+.foot{font-size:12px;color:var(--mu);text-align:center;margin:18px 0 12px}
+.x{display:none;margin:0 auto;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);color:var(--gold);border-radius:14px;padding:11px 28px;font-size:14px;font-family:inherit}
+.x:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){.wrap{animation:none}body,.bar i{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="hi" id="hi">Halo</div>
+    <div class="dt" id="dt">–</div>
+  </div>
+
+  <div class="g hero">
+    <div class="t">Total saldo</div>
+    <div class="big"><small>Rp</small><b id="bal">–</b></div>
+    <div class="bar"><i id="barf"></i></div>
+    <div class="note" id="bnote">Belum ada data</div>
+    <div class="duo">
+      <div class="chip p">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+        <div><small>Pemasukan</small><b id="inc">–</b></div>
+      </div>
+      <div class="chip n">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+        <div><small>Pengeluaran</small><b id="exp">–</b></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="g">
+    <div class="t">Ringkasan</div>
+    <div class="per" id="per"></div>
+  </div>
+
+  <div class="g" id="wkbox" style="display:none">
+    <div class="t">Pengeluaran 7 hari</div>
+    <div class="wk" id="wk"></div>
+    <div class="wl" id="wl"></div>
+  </div>
+
+  <div class="g">
+    <div class="t">Kategori bulan ini</div>
+    <div id="cat"></div>
+  </div>
+
+  <div class="g">
+    <div class="t">Aktivitas terbaru</div>
+    <div id="act"></div>
+  </div>
+
+  <div class="foot">Data diambil saat tombol Dashboard diketuk.</div>
+  <button class="x" id="x" type="button">Tutup</button>
+</div>
+<script>
+(function(){
+var tg = window.Telegram && window.Telegram.WebApp;
+var COL = ["#c9a96a","#7b8cde","#5eead4","#e5a9b4","#94a3b8","#f0abfc"];
+var UP = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';
+var DN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>';
+function $(id){return document.getElementById(id)}
+function el(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e}
+function num(n){return Math.abs(Math.round(Number(n)||0)).toLocaleString("id-ID")}
+function sgn(n){return (n<0?"-":"+")+num(n)}
+function cap(s){s=String(s);return s.charAt(0).toUpperCase()+s.slice(1)}
+
+function read(){
+  try{
+    var m = window.__H.match(/[#&]d=([^&]+)/);
+    if(!m) return null;
+    var s = m[1].replace(/-/g,"+").replace(/_/g,"/");
+    while(s.length%4) s+="=";
+    var bin = atob(s);
+    var u = Uint8Array.from(bin,function(c){return c.charCodeAt(0)});
+    return JSON.parse(new TextDecoder().decode(u));
+  }catch(e){return null}
+}
+
+function greet(){
+  var h = 12;
+  try{h = parseInt(new Intl.DateTimeFormat("en-GB",{hour:"numeric",hour12:false,timeZone:"Asia/Makassar"}).format(new Date()),10)%24}catch(e){}
+  if(h>=4&&h<11) return "Selamat pagi";
+  if(h>=11&&h<15) return "Selamat siang";
+  if(h>=15&&h<18) return "Selamat sore";
+  return "Selamat malam";
+}
+
+function dateLabel(d){
+  try{
+    var dt = d ? new Date(d+"T00:00:00Z") : new Date();
+    return new Intl.DateTimeFormat("id-ID",{weekday:"long",day:"numeric",month:"long",year:"numeric",timeZone:d?"UTC":"Asia/Makassar"}).format(dt);
+  }catch(e){return d||"–"}
+}
+
+function wkday(d,off){
+  try{
+    var t = new Date(d+"T00:00:00Z"); t.setUTCDate(t.getUTCDate()-off);
+    return new Intl.DateTimeFormat("id-ID",{weekday:"short",timeZone:"UTC"}).format(t);
+  }catch(e){return ""}
+}
+
+function countUp(node,to){
+  var neg = to<0, end = Math.abs(Math.round(to)), pre = neg?"-":"";
+  var calm = false;
+  try{calm = window.matchMedia("(prefers-reduced-motion:reduce)").matches}catch(e){}
+  if(calm || end===0 || !window.requestAnimationFrame){node.textContent = pre+end.toLocaleString("id-ID");return}
+  var t0 = null;
+  function f(ts){
+    if(t0===null) t0 = ts;
+    var p = Math.min(1,(ts-t0)/700), e = 1-Math.pow(1-p,3);
+    node.textContent = pre+Math.round(end*e).toLocaleString("id-ID");
+    if(p<1) requestAnimationFrame(f);
+  }
+  requestAnimationFrame(f);
+}
+
+function render(D){
+  $("hi").textContent = greet();
+  $("dt").textContent = dateLabel(D && D.d);
+  var per = $("per"), cat = $("cat"), act = $("act"), j;
+  if(!D){
+    per.appendChild(el("div","empty","Buka dari tombol Dashboard di bot untuk melihat data."));
+    cat.appendChild(el("div","empty","–"));
+    act.appendChild(el("div","empty","–"));
+    return;
+  }
+  var b = Number(D.b)||0, i = Number(D.i)||0, e = Number(D.e)||0;
+  countUp($("bal"),b);
+  $("inc").textContent = num(i);
+  $("exp").textContent = num(e);
+  if(i>0){
+    var pct = Math.max(0,Math.min(100,Math.round(b/i*100)));
+    setTimeout(function(){$("barf").style.width = pct+"%"},60);
+    $("bnote").textContent = "Sisa "+pct+"% dari total pemasukan";
+  }else{
+    $("bnote").textContent = "Belum ada pemasukan tercatat";
+  }
+
+  var names = ["Hari ini","Minggu ini","Bulan ini"], P = D.p || [];
+  for(var k=0;k<3;k++){
+    var p = P[k] || [0,0], d = el("div");
+    d.appendChild(el("div","k",names[k]));
+    d.appendChild(el("div","v "+(p[0]<0?"neg":p[0]>0?"pos":""),p[0]===0?"0":sgn(p[0])));
+    d.appendChild(el("div","c",(Number(p[1])||0)+" transaksi"));
+    per.appendChild(d);
+  }
+
+  var W = D.w;
+  if(Array.isArray(W) && W.length===7){
+    var mx = 0; for(j=0;j<7;j++) mx = Math.max(mx,Number(W[j])||0);
+    if(mx>0){
+      $("wkbox").style.display = "block";
+      for(j=0;j<7;j++){
+        var bar = el("i", j===6?"on":""), v = Number(W[j])||0;
+        bar.style.height = Math.max(4,Math.round(v/mx*100))+"%";
+        $("wk").appendChild(bar);
+        $("wl").appendChild(el("span",null,j===6?"Kini":wkday(D.d,6-j)));
+      }
+    }
+  }
+
+  var C = D.c || [], tot = 0;
+  for(j=0;j<C.length;j++) tot += Number(C[j][1])||0;
+  if(!C.length || tot<=0){
+    cat.appendChild(el("div","empty","Belum ada pengeluaran bulan ini."));
+  }else{
+    var seg = el("div","seg");
+    for(j=0;j<C.length;j++){
+      var s = el("i"); s.style.width = ((Number(C[j][1])||0)/tot*100)+"%"; s.style.background = COL[j%COL.length]; seg.appendChild(s);
+    }
+    cat.appendChild(seg);
+    for(j=0;j<C.length;j++){
+      var r = el("div","row"), l = el("div","l"), dot = el("span","dot"), rr = el("div","r");
+      dot.style.background = COL[j%COL.length];
+      l.appendChild(dot); l.appendChild(el("span",null,String(C[j][0])));
+      rr.appendChild(el("b",null,num(C[j][1])));
+      rr.appendChild(el("small",null,Math.round((Number(C[j][1])||0)/tot*100)+"%"));
+      r.appendChild(l); r.appendChild(rr);
+      cat.appendChild(r);
+    }
+  }
+
+  var R = D.r || [];
+  if(!R.length){ act.appendChild(el("div","empty","Belum ada transaksi.")); }
+  for(j=0;j<R.length;j++){
+    var a = R[j], amt = Number(a[3])||0, neg = amt<0;
+    var row = el("div","row"), left = el("div","l"), av = el("div","av "+(neg?"n":"p")), tt = el("div","tt"), right = el("div","r");
+    av.innerHTML = neg?DN:UP;
+    tt.appendChild(el("b",null,cap(a[0])));
+    tt.appendChild(el("small",null,String(a[1])));
+    left.appendChild(av); left.appendChild(tt);
+    right.appendChild(el("b",neg?"neg":"pos",sgn(amt)));
+    right.appendChild(el("small",null,String(a[2])));
+    row.appendChild(left); row.appendChild(right);
+    act.appendChild(row);
+  }
+}
+
+render(read());
+
+if(tg){
+  try{
+    tg.ready(); tg.expand();
+    if(tg.setHeaderColor) tg.setHeaderColor("#07090f");
+    if(tg.setBackgroundColor) tg.setBackgroundColor("#07090f");
+  }catch(e){}
+  var x = $("x");
+  x.style.display = "block";
+  x.addEventListener("click",function(){
+    try{tg.HapticFeedback.impactOccurred("light")}catch(e){}
+    document.body.classList.add("out");
+    setTimeout(function(){tg.close()},150);
+  });
+}
+})();
+</script>
+</body>
+</html>
