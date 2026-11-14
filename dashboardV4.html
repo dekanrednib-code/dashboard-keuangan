@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#07090f">
+<title>Daily Financial Record</title>
+<script>window.__H = location.hash || "";</script>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root{--bg:#07090f;--gold:#d9bf88;--gold2:#c9a96a;--tx:#f5f2ea;--mu:rgba(255,255,255,.5);--pos:#6ee7b7;--neg:#fda4af}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg)}
+body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--tx);min-height:100dvh;
+ background:radial-gradient(420px 320px at 0% 0%,rgba(59,74,156,.42),transparent 70%),radial-gradient(380px 300px at 100% 85%,rgba(201,169,106,.16),transparent 70%),var(--bg);
+ background-attachment:fixed;-webkit-font-smoothing:antialiased;transition:opacity .15s ease,transform .15s ease}
+body.out{opacity:0;transform:scale(.98)}
+.wrap{width:100%;max-width:480px;margin:0 auto;padding:calc(env(safe-area-inset-top,0px) + 20px) 16px calc(env(safe-area-inset-bottom,0px) + 28px);animation:in .5s ease both}
+@keyframes in{from{opacity:0}to{opacity:1}}
+.top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px}
+.app{font-size:11px;letter-spacing:.14em;color:var(--mu)}
+.hi{font-size:22px;font-weight:500;margin-top:4px}
+.dt{font-size:13px;color:rgba(255,255,255,.65);margin-top:2px}
+.x{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);color:var(--gold);border-radius:12px;padding:8px 14px;font-size:13px;font-family:inherit;display:none}
+.x:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.g{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.09);border-top-color:rgba(255,255,255,.22);border-radius:20px;padding:16px;margin-bottom:12px}
+@supports ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.g{background:rgba(255,255,255,.05);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}}
+.hero{background:linear-gradient(160deg,rgba(255,255,255,.12),rgba(255,255,255,.04));border-top-color:rgba(255,255,255,.28);padding:18px}
+.lb{font-size:11px;letter-spacing:.12em;color:var(--mu)}
+.big{display:flex;align-items:baseline;gap:6px;margin:6px 0 12px}
+.big small{font-size:16px;color:var(--gold)}
+.big b{font-size:36px;font-weight:500;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{border-radius:10px;padding:5px 10px;font-size:13px;font-variant-numeric:tabular-nums;border:1px solid}
+.chip.p{background:rgba(52,211,153,.14);border-color:rgba(52,211,153,.35);color:var(--pos)}
+.chip.n{background:rgba(251,113,133,.14);border-color:rgba(251,113,133,.35);color:var(--neg)}
+.bar{height:4px;border-radius:2px;background:rgba(255,255,255,.1);overflow:hidden;margin-top:14px}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--gold2),#e8d4a2)}
+.note{font-size:12px;color:var(--mu);margin-top:8px}
+.per{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.per div{text-align:center}
+.per .v{font-size:15px;font-weight:500;margin-top:6px;font-variant-numeric:tabular-nums}
+.per .c{font-size:11px;color:var(--mu);margin-top:2px}
+.pos{color:var(--pos)}.neg{color:var(--neg)}
+.seg{display:flex;height:8px;border-radius:4px;overflow:hidden;gap:2px;margin:12px 0}
+.seg i{display:block;height:100%}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-top:1px solid rgba(255,255,255,.07);font-size:14px}
+.row:first-of-type{border-top:0}
+.row span.l{display:flex;align-items:center;gap:8px;min-width:0}
+.dot{width:8px;height:8px;border-radius:50%;flex:none}
+.tt{min-width:0}
+.tt b{display:block;font-weight:400;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tt small{display:block;font-size:12px;color:var(--mu);margin-top:2px}
+.am{font-variant-numeric:tabular-nums;white-space:nowrap}
+.empty{font-size:13px;color:var(--mu);padding:8px 0}
+@media (prefers-reduced-motion:reduce){.wrap{animation:none}body{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div>
+      <div class="app">DAILY FINANCIAL RECORD</div>
+      <div class="hi" id="hi">Halo</div>
+      <div class="dt" id="dt">–</div>
+    </div>
+    <button class="x" id="x" type="button">Tutup</button>
+  </div>
+
+  <div class="g hero">
+    <div class="lb">TOTAL SALDO</div>
+    <div class="big"><small>Rp</small><b id="bal">–</b></div>
+    <div class="chips"><span class="chip p" id="inc">+ –</span><span class="chip n" id="exp">- –</span></div>
+    <div class="bar"><i id="barf" style="width:0%"></i></div>
+    <div class="note" id="bnote">Belum ada data</div>
+  </div>
+
+  <div class="g">
+    <div class="lb">RINGKASAN</div>
+    <div class="per" id="per"></div>
+  </div>
+
+  <div class="g">
+    <div class="lb">KATEGORI BULAN INI</div>
+    <div id="cat"></div>
+  </div>
+
+  <div class="g">
+    <div class="lb">AKTIVITAS TERBARU</div>
+    <div id="act"></div>
+  </div>
+</div>
+<script>
+(function(){
+var tg = window.Telegram && window.Telegram.WebApp;
+var COL = ["#c9a96a","#7b8cde","#5eead4","#e5a9b4","#94a3b8","#f0abfc"];
+function $(id){return document.getElementById(id)}
+function el(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e}
+function num(n){return Math.abs(Math.round(Number(n)||0)).toLocaleString("id-ID")}
+function sgn(n){return (n<0?"-":"+")+num(n)}
+
+function read(){
+  try{
+    var m = window.__H.match(/[#&]d=([^&]+)/);
+    if(!m) return null;
+    var s = m[1].replace(/-/g,"+").replace(/_/g,"/");
+    while(s.length%4) s+="=";
+    var bin = atob(s);
+    var u = Uint8Array.from(bin,function(c){return c.charCodeAt(0)});
+    return JSON.parse(new TextDecoder().decode(u));
+  }catch(e){return null}
+}
+
+function greet(){
+  var h = 12;
+  try{h = parseInt(new Intl.DateTimeFormat("en-GB",{hour:"numeric",hour12:false,timeZone:"Asia/Makassar"}).format(new Date()),10)%24}catch(e){}
+  if(h>=4&&h<11) return "Selamat pagi";
+  if(h>=11&&h<15) return "Selamat siang";
+  if(h>=15&&h<18) return "Selamat sore";
+  return "Selamat malam";
+}
+
+function dateLabel(d){
+  try{
+    var dt = d ? new Date(d+"T00:00:00Z") : new Date();
+    return new Intl.DateTimeFormat("id-ID",{weekday:"long",day:"numeric",month:"long",year:"numeric",timeZone:d?"UTC":"Asia/Makassar"}).format(dt);
+  }catch(e){return d||"–"}
+}
+
+function render(D){
+  $("hi").textContent = greet();
+  $("dt").textContent = dateLabel(D && D.d);
+  var per = $("per"), cat = $("cat"), act = $("act");
+  if(!D){
+    per.appendChild(el("div","empty","Buka dari tombol Dashboard di bot untuk melihat data."));
+    cat.appendChild(el("div","empty","–"));
+    act.appendChild(el("div","empty","–"));
+    return;
+  }
+  var b = Number(D.b)||0, i = Number(D.i)||0, e = Number(D.e)||0;
+  $("bal").textContent = (b<0?"-":"")+num(b);
+  $("inc").textContent = "+ "+num(i);
+  $("exp").textContent = "- "+num(e);
+  if(i>0){
+    var pct = Math.max(0,Math.min(100,Math.round(b/i*100)));
+    $("barf").style.width = pct+"%";
+    $("bnote").textContent = pct+"% dari pemasukan masih tersisa";
+  }else{
+    $("bnote").textContent = "Belum ada pemasukan tercatat";
+  }
+
+  var names = ["Hari ini","Minggu ini","Bulan ini"], P = D.p || [];
+  for(var k=0;k<3;k++){
+    var p = P[k] || [0,0], d = el("div");
+    d.appendChild(el("div","lb",names[k]));
+    d.appendChild(el("div","v "+(p[0]<0?"neg":p[0]>0?"pos":""),p[0]===0?"0":sgn(p[0])));
+    d.appendChild(el("div","c",(Number(p[1])||0)+" transaksi"));
+    per.appendChild(d);
+  }
+
+  var C = D.c || [], tot = 0, j;
+  for(j=0;j<C.length;j++) tot += Number(C[j][1])||0;
+  if(!C.length || tot<=0){
+    cat.appendChild(el("div","empty","Belum ada pengeluaran bulan ini."));
+  }else{
+    var seg = el("div","seg");
+    for(j=0;j<C.length;j++){
+      var s = el("i"); s.style.width = ((Number(C[j][1])||0)/tot*100)+"%"; s.style.background = COL[j%COL.length]; seg.appendChild(s);
+    }
+    cat.appendChild(seg);
+    for(j=0;j<C.length;j++){
+      var r = el("div","row"), l = el("span","l"), dot = el("span","dot");
+      dot.style.background = COL[j%COL.length];
+      l.appendChild(dot); l.appendChild(el("span",null,String(C[j][0])));
+      r.appendChild(l); r.appendChild(el("span","am",num(C[j][1])));
+      cat.appendChild(r);
+    }
+  }
+
+  var R = D.r || [];
+  if(!R.length){ act.appendChild(el("div","empty","Belum ada transaksi.")); }
+  for(j=0;j<R.length;j++){
+    var a = R[j], amt = Number(a[3])||0, row = el("div","row"), tt = el("div","tt");
+    tt.appendChild(el("b",null,String(a[0])));
+    tt.appendChild(el("small",null,String(a[1])+" \u00b7 "+String(a[2])));
+    row.appendChild(tt);
+    row.appendChild(el("span","chip am "+(amt<0?"n":"p"),sgn(amt)));
+    act.appendChild(row);
+  }
+}
+
+render(read());
+
+if(tg){
+  try{
+    tg.ready(); tg.expand();
+    if(tg.setHeaderColor) tg.setHeaderColor("#07090f");
+    if(tg.setBackgroundColor) tg.setBackgroundColor("#07090f");
+  }catch(e){}
+  var x = $("x");
+  x.style.display = "inline-block";
+  x.addEventListener("click",function(){
+    try{tg.HapticFeedback.impactOccurred("light")}catch(e){}
+    document.body.classList.add("out");
+    setTimeout(function(){tg.close()},150);
+  });
+}
+})();
+</script>
+</body>
+</html>
